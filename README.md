@@ -1,7 +1,7 @@
 ### What is TEMP-WRITER
 
 TEMP-WRITER is a virtual typewriter system that can be used on a desktop.  
- It utilizes mediapipe to recognize your hand gestures, and a thermal printer (EPSON TM-T90) is used to print images and strings that have been bound to specific gestures in real-time.
+ It utilizes mediapipe(Hands) to recognize your hand gestures, and a thermal printer (EPSON TM-T90) is used to print images and strings that have been bound to specific gestures in real-time.
 
 The preset images and strings can be customized and used for various creative purposes.  
 For example, registering alphabets and symbols will make it work like a "real" typewriter.  
@@ -13,7 +13,8 @@ Now, please enjoy this creation.
 
 `git clone <tempwriter-repo>`  
 `cd tempwriter`  
-`python -m SimpleHTTPServer`
+`poetry install`  
+`poetry run python -m SimpleHTTPServer`
 
 ### note
 

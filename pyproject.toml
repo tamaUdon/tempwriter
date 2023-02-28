@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "tempwriter"
+version = "0.1.0"
+description = ""
+authors = ["tamaUdon <sakurayuki603@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+mediapipe = "0.9.1.0"
+opencv-python = "4.7.0.72"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

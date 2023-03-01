@@ -14,8 +14,9 @@ Now, please enjoy this creation.
 `git clone <tempwriter-repo>`  
 `cd tempwriter`  
 `poetry install`  
+`poetry run python tempwriter/main.py`  
 `poetry run python -m SimpleHTTPServer`
 
 ### note
 
-this project based on https://clutter.ikuta.me/webusb-escpos-demo/ and https://github.com/samccone/thermal_print
+this project based on https://github.com/Kazuhito00/mediapipe-python-sample, https://clutter.ikuta.me/webusb-escpos-demo/ and https://github.com/samccone/thermal_print

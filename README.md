@@ -14,8 +14,7 @@ Now, please enjoy this creation.
 `git clone <tempwriter-repo>`  
 `cd tempwriter`  
 `poetry install`  
-`poetry run python tempwriter/main.py`  
-`poetry run python -m SimpleHTTPServer`
+`python3 -m http.server 8000`
 
 ### note
 

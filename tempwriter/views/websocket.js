@@ -9,7 +9,7 @@ var messageTextArea = document.getElementById("messageTextArea"); // HTML内の�
 
 // サーバとの通信を接続する関数
 function connect(){
-    webSocket = new WebSocket("ws://localhost:8001"); // インスタンスを作り、サーバと接続
+    webSocket = new WebSocket("ws://localhost:8989"); // インスタンスを作り、サーバと接続
 
     // ソケット接続すれば呼び出す関数を設定
     webSocket.onopen = function(message){

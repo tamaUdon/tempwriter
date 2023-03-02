@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>WebUSB ESC/POS demo</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/encoding-japanese/1.0.30/encoding.min.js" integrity="sha256-3N1q3S/Cg/TL0ER062kNT2VYIsHLzEqymlj2dEXYhXI=" crossorigin="anonymous"></script>
-    <script src="./webusb-escpos.js"></script>
-    <script src="./binaryimage.js"></script>
 </head>
 <body>
+    <!-- ここからwebsocketコネクション -->
+    <h1>websocket connecter</h1>
+    <form>
+        <input id="textMessage" type="text">
+        <input onclick="connect()" value="Connect" type="button">
+        <input onclick="sendMessage()" value="Send" type="button">
+        <input onclick="disconnect()" value="Disconnect" type="button">
+    </form>
+    <br />
+    <!-- テキスト出力エリア -->
+    <textarea id="messageTextArea" rows="10" cols="50"></textarea>
+
+    <!-- ここからプリンター接続 -->
     <h1>WebUSB ESC/POS demo</h1>
     <p id="message">click "start" to connect printer</p>
     <textarea placeholder="text to print"></textarea>
@@ -20,6 +30,11 @@
         <button id="button-58mm">58mm</button>
         <button id="button-80mm">80mm</button>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/encoding-japanese/1.0.30/encoding.min.js"
+        integrity="sha256-3N1q3S/Cg/TL0ER062kNT2VYIsHLzEqymlj2dEXYhXI=" crossorigin="anonymous"></script>
+    <script src="./webusb-escpos.js"></script>
+    <script src="./binaryimage.js"></script>
+    <script src="./websocket.js"></script>
     <script>
 
 const $ = document.querySelector.bind(document);

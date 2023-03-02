@@ -12,8 +12,9 @@ Now, please enjoy this creation.
 ### install
 
 `git clone <tempwriter-repo>`  
-`cd tempwriter`  
+`cd <project-root-dir>`  
 `poetry install`  
+`cd ./tempwriter/views`  
 `python3 -m http.server 8000`
 
 ### note

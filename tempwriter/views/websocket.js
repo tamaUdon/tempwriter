@@ -27,6 +27,7 @@ function connect(){
     };
 
     // ソケットサーバからメッセージが受信すれば呼び出す関数を設定
+    // ここで画面上の矩形を表示on/off
     webSocket.onmessage = function(message){
     messageTextArea.value += "Receive => "+message.data+"\n";
     };

@@ -15,7 +15,7 @@ Now, please enjoy this creation.
 `cd <project-root-dir>`  
 `poetry install`  
 `cd ./tempwriter/views`  
-`python3 -m http.server 8000`
+`python3 -m http.server 8989`
 
 ### note
 

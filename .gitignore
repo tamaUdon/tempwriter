@@ -131,3 +131,6 @@ dmypy.json
 
 # bat
 *.bat
+
+# keys
+*.pem

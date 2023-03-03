@@ -10,7 +10,8 @@ readme = "README.md"
 python = "^3.11"
 mediapipe = "0.9.1.0"
 opencv-python = "4.7.0.72"
-websockets = "10.4"
+flask = "2.2.3"
+numpy = "1.24.2"
 
 
 [build-system]

@@ -2,7 +2,7 @@
 from flask import Flask, render_template, Response
 import cv2
 import sys
-import numpy
+import 
 
 app = Flask(__name__)
 
@@ -21,8 +21,11 @@ def get_frame():
 
 @app.route('/')
 def index():
+     
      return Response(get_frame(),mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8989, debug=True, threaded=True)
+
+# flaskからhtml & controller.jsの命令を発火させる

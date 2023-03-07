@@ -26,7 +26,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-PATHS
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -91,7 +90,6 @@ ipython_config.py
 #   having no cross-platform support, pipenv may install dependencies that don't work, or not
 #   install all needed dependencies.
 #Pipfile.lock
-poetry.lock
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
 __pypackages__/
@@ -132,6 +130,3 @@ dmypy.json
 
 # bat
 *.bat
-
-# keys
-*.pem

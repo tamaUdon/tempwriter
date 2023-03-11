@@ -14,8 +14,7 @@ Now, please enjoy this creation.
 `git clone <tempwriter-repo>`  
 `cd <project-root-dir>`  
 `poetry install`  
-`cd ./tempwriter/views`  
-`python3 -m http.server 8989`
+`poetry run python app.py`
 
 ### note
 

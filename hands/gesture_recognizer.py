@@ -13,13 +13,30 @@ import copy
 import argparse
 import itertools
 import cvfpscalc
+import js2py
 
 import keypoint_classifier.keypoint_classifier as kc
 import point_history_classifier.point_history_classifier as phc
 
+# translate .js to .py
+js2py.translate_file(r"../printer/webusb-escpos.js", "printer_to_py/webusb_escpos.py")
+js2py.translate_file(r"../printer/binaryimage.js", "printer_to_py/binariimage.py")
+js2py.translate_file(r"../printer/controller.js", "printer_to_py/controller.py")
+
+# import .js function as python library
+from printer_to_py.escpos import escpos
+from printer_to_py.binaryimage import binaryimage
+from printer_to_py.controller import controller
+
 cap = None
 ret = None
 image_ = None
+
+isPrinting = False
+
+def setup_printer():
+    controller.init()
+    controller.pair() # TODO: 自動ペアできるようにする
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -155,10 +172,11 @@ def gesture_():
                 hand_sign_id = keypoint_classifier_(pre_processed_landmark_list)
                 if hand_sign_id == 2:  # 指差しサイン
                     # 印刷
-                    # if registrar.get("printText") == False:
-                    #     registrar.add("printText", True)
-                    ここでjsサーバーに描画指示
-                    jsサーバーからprinterに命令
+                    if not isPrinting:
+                        # ここでjsサーバーに描画指示
+                        # jsサーバーからprinterに命令
+                        printer.printText("test!!!!") # TODO: ここasyncになってるはずなんだが
+                        isPrinting = True # 戻ってきたら
                         
                     point_history.append(landmark_list[8])  # 人差指座標
                     

@@ -3,11 +3,11 @@ const $ = document.querySelector.bind(document);
 
 let printer;
 
-async function printText () {
+async function printText (txt) {
     await printer.selectKanjiCode('sjis');
     await printer.enableKanjiMode();
     await printer.selectInternationalCharacter(0x08); // JP
-    const str = 'test print! ' //$('textarea').value + '\n';
+    const str = txt //$('textarea').value + '\n';
     await printer.raw(new Uint8Array(Escpos.Printer.encodeSJIS(str)));
     await printer.disableKanjiMode();
 }

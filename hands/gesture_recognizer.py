@@ -5,63 +5,21 @@ import cv2 as cv
 import numpy as np
 import mediapipe as mp
 
+from collections import Counter
+from collections import deque
+
+import csv
+import copy
 import argparse
+import itertools
 import cvfpscalc
+
 import keypoint_classifier.keypoint_classifier as kc
 import point_history_classifier.point_history_classifier as phc
 
-# flaskからhtml & controller.jsの命令を発火させる
 cap = None
 ret = None
 image_ = None
-
-# flaskのページ間変数共有
-class MyObjectRegistrar(object):
-    def __init__(self, app=None):
-        self.app = app
-        self.my_objects = {}
-        if app is not None:
-            self.init_app(app)
-
-    def init_app(self, app):
-        # load any config into your registrar from the app config if necessary
-        pass
-
-    # 同一id指定でupdate可能
-    def add(self, id, obj):
-        self.my_objects[id] = obj
-        # self.notify()
-
-    def get(self, id):
-        return self.my_objects.get(id, None)
-
-    def remove(self, id):
-        del self.my_objects[id]
-        #self.notify()
-
-    # def notify(self, modifier = None):
-    #     for observer in self.my_objects:
-    #         if modifier != observer:
-    #             print('変更されました')
-    #             printer()
-    #             #observer.update(self)
-
-# class SharedData(MyObjectRegistrar):
-#     def __init__(self, obj =''):
-#         MyObjectRegistrar.__init__(self)
-#         self._obj = obj
-
-#     @property
-#     def data(self):
-#         return self._obj
- 
-#     @data.setter
-#     def data(self, obj):
-#         self._obj = obj
-#         self.notify()
-
-# app = Flask(__name__)
-# registrar = MyObjectRegistrar(app)
 
 def get_args():
     parser = argparse.ArgumentParser()

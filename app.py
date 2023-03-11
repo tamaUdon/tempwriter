@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, Response, get_template_attribute
-import csv
-import copy
-import argparse
-import itertools
-from collections import Counter
-from collections import deque
 import js2py
 
 from hands import gesture_recognizer as hands

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import asyncio
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
@@ -15,18 +16,25 @@ import itertools
 import cvfpscalc
 import js2py
 
-import keypoint_classifier.keypoint_classifier as kc
-import point_history_classifier.point_history_classifier as phc
+import keypoint_classifier as kc
+import point_history_classifier as phc
 
 # translate .js to .py
-js2py.translate_file(r"../printer/webusb-escpos.js", "printer_to_py/webusb_escpos.py")
-js2py.translate_file(r"../printer/binaryimage.js", "printer_to_py/binariimage.py")
-js2py.translate_file(r"../printer/controller.js", "printer_to_py/controller.py")
+# js2py.translate_file(r"printer/escpos.js", "printer_to_py/escpos.py")
+# js2py.translate_file(r"printer/binaryimage.js", "printer_to_py/binariimage.py")
+
+#js2py.translate_file(r"printer/controller.js", "printer_to_py/controller.py")
+source = js2py.translate_js6('printer/controller.js')
+js2py.write_file_contents('js_to_py/controller.py',source)
+#eval_result, controller = js2py.run_file(js5)
 
 # import .js function as python library
-from printer_to_py.escpos import escpos
-from printer_to_py.binaryimage import binaryimage
-from printer_to_py.controller import controller
+# from printer_to_py.escpos import escpos
+# from printer_to_py.binaryimage import binaryimage
+
+# js6変換の方法はあっていそう。この下のimportでReferenceError: printer is not definedが出てる
+# 生成したsourceが正規のpythonコードじゃなさそうだから、js2pyでevalか追加でsourcewを正規のpyコードに変換できればいいね。
+from js_to_py import controller
 
 cap = None
 ret = None
@@ -34,9 +42,14 @@ image_ = None
 
 isPrinting = False
 
-def setup_printer():
-    controller.init()
-    controller.pair() # TODO: 自動ペアできるようにする
+async def setup_printer():
+    await controller.init()
+    print("init done!")
+    await controller.pair() # TODO: 自動ペアできるようにする
+    print("pair done!")
+
+async def printText(text):
+    await controller.printText(text)
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -171,14 +184,11 @@ def gesture_():
                 # ハンドサイン分類
                 hand_sign_id = keypoint_classifier_(pre_processed_landmark_list)
                 if hand_sign_id == 2:  # 指差しサイン
-                    # 印刷
-                    if not isPrinting:
-                        # ここでjsサーバーに描画指示
-                        # jsサーバーからprinterに命令
-                        printer.printText("test!!!!") # TODO: ここasyncになってるはずなんだが
-                        isPrinting = True # 戻ってきたら
-                        
                     point_history.append(landmark_list[8])  # 人差指座標
+                    if not isPrinting:
+                        # 描画指示
+                        asyncio.run(printText("test!!!!"))
+                        isPrinting = True
                     
                 else:
                     point_history.append([0, 0])

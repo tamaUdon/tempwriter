@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import asyncio
 from flask import Flask, render_template, Response, get_template_attribute
-import js2py
-
 from hands import gesture_recognizer as hands
 
 app = Flask(__name__)
@@ -10,6 +9,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
+    asyncio.run(hands.setup_printer())
     return Response(hands.gesture_(),mimetype='multipart/x-mixed-replace; boundary=frame')
     # TODO: 後でプリンター画面とくっつける（いるのか？）
     #return render_template('index.html')

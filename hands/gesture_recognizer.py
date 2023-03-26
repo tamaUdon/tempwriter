@@ -9,6 +9,7 @@ import mediapipe as mp
 from collections import Counter
 from collections import deque
 
+import os
 import csv
 import copy
 import argparse
@@ -24,17 +25,28 @@ import point_history_classifier as phc
 # js2py.translate_file(r"printer/binaryimage.js", "printer_to_py/binariimage.py")
 
 #js2py.translate_file(r"printer/controller.js", "printer_to_py/controller.py")
-source = js2py.translate_js6('printer/controller.js')
-js2py.write_file_contents('js_to_py/controller.py',source)
+
+py_code = js2py.translate_js6('controller.js')
+#js2py.write_file_contents('js_to_py/controller.py',source)
+
+# 現時点では "translate_js6()" はpycodeを返却している
+# originalのtranslate_file()に合わせて追記
+# -> 動かない。%sの定義忘れてるかも。確認する。
+output_path = 'js_to_py/controller.py'
+lib_name = os.path.basename(output_path).split('.')[0]
+head = '__all__ = [%s]\n\n# Don\'t look below, you will not understand this Python code :) I don\'t.\n\n' % repr(
+    lib_name)
+tail = '\n\n# Add lib to the module scope\n%s = var.to_python()' % lib_name
+out = head + py_code + tail
+js2py.write_file_contents(output_path, out)
+
 #eval_result, controller = js2py.run_file(js5)
 
 # import .js function as python library
 # from printer_to_py.escpos import escpos
 # from printer_to_py.binaryimage import binaryimage
 
-# js6変換の方法はあっていそう。この下のimportでReferenceError: printer is not definedが出てる
-# 生成したsourceが正規のpythonコードじゃなさそうだから、js2pyでevalか追加でsourcewを正規のpyコードに変換できればいいね。
-from js_to_py import controller
+from js_to_py.controller import controller
 
 cap = None
 ret = None

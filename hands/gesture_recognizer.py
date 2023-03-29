@@ -20,34 +20,9 @@ import js2py
 import keypoint_classifier as kc
 import point_history_classifier as phc
 
-# translate .js to .py
-# js2py.translate_file(r"printer/escpos.js", "printer_to_py/escpos.py")
-# js2py.translate_file(r"printer/binaryimage.js", "printer_to_py/binariimage.py")
+# 一旦controller.js含むprinter周りのjsをpythonに書き直した方が早そうかも
 
-#js2py.translate_file(r"printer/controller.js", "printer_to_py/controller.py")
-
-py_code = js2py.translate_js6('controller.js')
-#js2py.write_file_contents('js_to_py/controller.py',source)
-
-# 現時点では "translate_js6()" はpycodeを返却している
-# originalのtranslate_file()に合わせて追記
-# -> 動かない。%sの定義忘れてるかも。確認する。
-output_path = 'js_to_py/controller.py'
-lib_name = os.path.basename(output_path).split('.')[0]
-head = '__all__ = [%s]\n\n# Don\'t look below, you will not understand this Python code :) I don\'t.\n\n' % repr(
-    lib_name)
-tail = '\n\n# Add lib to the module scope\n%s = var.to_python()' % lib_name
-out = head + py_code + tail
-js2py.write_file_contents(output_path, out)
-
-#eval_result, controller = js2py.run_file(js5)
-
-# import .js function as python library
-# from printer_to_py.escpos import escpos
-# from printer_to_py.binaryimage import binaryimage
-
-from js_to_py.controller import controller
-
+from js_to_py import controller
 cap = None
 ret = None
 image_ = None

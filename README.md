@@ -11,10 +11,11 @@ Now, please enjoy this creation.
 
 ### install
 
-`git clone <tempwriter-repo>`  
-`cd <project-root-dir>`  
-`poetry install`  
-`poetry run python app.py`
+`$ git clone <tempwriter-repo>`  
+`$ cd <project-root-dir>`  
+`$ brew install libusb // requirements for pyusb (macOS)`  
+`$ poetry install`  
+`$ poetry run python app.py`
 
 ### note
 

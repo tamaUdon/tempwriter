@@ -8,12 +8,12 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
+pyusb = "^1.2.1"
 mediapipe = "0.9.1.0"
 opencv-python = "4.7.0.72"
 flask = "2.2.3"
 numpy = "1.24.2"
 tensorflow = "2.11.0"
-js2py = "0.74.0"
 
 
 [build-system]

@@ -15,14 +15,13 @@ import copy
 import argparse
 import itertools
 import cvfpscalc
-import js2py
 
 import keypoint_classifier as kc
 import point_history_classifier as phc
 
 # 一旦controller.js含むprinter周りのjsをpythonに書き直した方が早そうかも
 
-from js_to_py import controller
+
 cap = None
 ret = None
 image_ = None

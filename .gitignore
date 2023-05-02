@@ -27,6 +27,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 PATHS
+.gitmodules
+poetry.toml
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

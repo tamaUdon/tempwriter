@@ -1,11 +1,21 @@
 import usb.core
 import usb.util
 
-async def init():
+def init_escpos():
+    from escpos.printer import Usb
+    p = Usb(idVendor=0x04b8, idProduct=0x0202)
+
+    text = "Lorem ipsum dolor （中略） id est laborum."
+
+    p.text(text)
+    p.cut()
+
+
+def init():
     # pyusbのチュートリアルから
     # https://github.com/pyusb/pyusb/blob/master/docs/tutorial.rst
     # find our device
-    dev = usb.core.find(idVendor=0xfffe, idProduct=0x0001)
+    dev = usb.core.find(idVendor=0x04b8, idProduct=0x0202)
 
     # was it found?
     if dev is None:
@@ -59,4 +69,7 @@ async def init():
 #     showMessage(`Connected to ${device.productName} (${device.serialNumber})`);
 # }
 
-init()
+# init()
+# pair()
+
+init_escpos()

@@ -16,7 +16,7 @@ $ git clone <tempwriter-repo>
 $ cd <project-root-dir>
 $ brew install libusb // requirements for pyusb (macOS)
 $ poetry install
-$ poetry run python app.py
+$ poetry run python app.py // access to localhost:8989
 ```
 
 ### note

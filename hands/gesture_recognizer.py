@@ -8,6 +8,7 @@ import mediapipe as mp
 
 from collections import Counter
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor
 
 import os
 import csv
@@ -16,26 +17,13 @@ import argparse
 import itertools
 import cvfpscalc
 
-import keypoint_classifier as kc
-import point_history_classifier as phc
-
-# 一旦controller.js含むprinter周りのjsをpythonに書き直した方が早そうかも
-
+from keypoint_classifier import keypoint_classifier as kc
+from point_history_classifier import point_history_classifier as phc
+from printer import controller as printer
 
 cap = None
 ret = None
 image_ = None
-
-isPrinting = False
-
-async def setup_printer():
-    await controller.init()
-    print("init done!")
-    await controller.pair() # TODO: 自動ペアできるようにする
-    print("pair done!")
-
-async def printText(text):
-    await controller.printText(text)
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -60,6 +48,10 @@ def get_args():
 
 
 def gesture_():
+    
+    isPrinting = False
+    printer.init_printer()
+    
     # 引数解析 #################################################################
     args = get_args()
 
@@ -171,11 +163,16 @@ def gesture_():
                 hand_sign_id = keypoint_classifier_(pre_processed_landmark_list)
                 if hand_sign_id == 2:  # 指差しサイン
                     point_history.append(landmark_list[8])  # 人差指座標
+                    # 描画指示
                     if not isPrinting:
-                        # 描画指示
-                        asyncio.run(printText("test!!!!"))
                         isPrinting = True
-                    
+                        ### start thread (escposがasyncio未対応のためconcurrent.futureでラップしています😿) ###
+                        # ref. https://gist.github.com/tag1216/40b75346fd4ffdbfba22a55905094b0e#file-03_map-py
+                        with ThreadPoolExecutor(max_workers=2, thread_name_prefix="print_thread") as executor:
+                            future = executor.submit(printer.output_and_cut, "Vサインを認識しました!")
+                        # print(future.result())
+                    ### end thread ###
+                    isPrinting = False
                 else:
                     point_history.append([0, 0])
 

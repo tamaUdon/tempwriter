@@ -7,9 +7,15 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
-mediapipe = "0.9.1.0"
-opencv-python = "4.7.0.72"
+escpos = "^1.9"
+python = ">=3.11,<3.12"
+pyusb = "^1.2.1"
+mediapipe = "^0.9.1.0"
+opencv-python = "^4.7.0.72"
+flask = "^2.2.3"
+numpy = "^1.1"
+tensorflow-io-gcs-filesystem = "^0.32.0"
+tensorflow = "^2.12.0"
 
 
 [build-system]

@@ -1,36 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>WebUSB ESC/POS demo</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/encoding-japanese/1.0.30/encoding.min.js" integrity="sha256-3N1q3S/Cg/TL0ER062kNT2VYIsHLzEqymlj2dEXYhXI=" crossorigin="anonymous"></script>
-    <script src="./webusb-escpos.js"></script>
-    <script src="./binaryimage.js"></script>
-</head>
-<body>
-    <h1>WebUSB ESC/POS demo</h1>
-    <p id="message">click "start" to connect printer</p>
-    <textarea placeholder="text to print"></textarea>
-    <div>
-        <button id="button-pair">pair</button>
-        <button id="button-print-text">print text</button>
-        <button id="button-cut">cut</button>
-        <input type="file" id="input-file">
-        <button id="button-print-image">print image</button>
-        <button id="button-58mm">58mm</button>
-        <button id="button-80mm">80mm</button>
-    </div>
-    <script>
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 
 const $ = document.querySelector.bind(document);
 
 let printer;
 
-async function printText () {
+async function printText (txt) {
     await printer.selectKanjiCode('sjis');
     await printer.enableKanjiMode();
     await printer.selectInternationalCharacter(0x08); // JP
-    const str = $('textarea').value + '\n';
+    const str = txt; //$('textarea').value + '\n';
     await printer.raw(new Uint8Array(Escpos.Printer.encodeSJIS(str)));
     await printer.disableKanjiMode();
 }
@@ -156,7 +135,3 @@ $('#button-58mm').addEventListener('click', set58mm);
 $('#button-80mm').addEventListener('click', set80mm);
 
 init();
-
-    </script>
-</body>
-</html>

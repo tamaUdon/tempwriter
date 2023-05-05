@@ -11,11 +11,13 @@ Now, please enjoy this creation.
 
 ### install
 
-`git clone <tempwriter-repo>`  
-`cd tempwriter`  
-`poetry install`  
-`poetry run python tempwriter/main.py`  
-`poetry run python -m SimpleHTTPServer`
+```
+$ git clone <tempwriter-repo>
+$ cd <project-root-dir>
+$ brew install libusb // requirements for pyusb (macOS)
+$ poetry install
+$ poetry run python app.py // access to localhost:8989
+```
 
 ### note
 

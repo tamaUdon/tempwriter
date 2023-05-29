@@ -59,6 +59,7 @@ def prepare():
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, cap_height)
 
     # Create an GestureRecognizer object.
+    # TODO: 新しい.taskと入れ替える
     base_options = python.BaseOptions(model_asset_path='./hands/model/gesture_recognizer.task')
     options = vision.GestureRecognizerOptions(base_options=base_options)
     recognizer = vision.GestureRecognizer.create_from_options(options)

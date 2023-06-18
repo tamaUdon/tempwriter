@@ -9,7 +9,7 @@ It is also possible to endlessly print out only kawaii cat images.
 
 Now, please enjoy this creation.
 
-### install
+### Install
 
 ```
 $ git clone <tempwriter-repo>
@@ -19,6 +19,10 @@ $ poetry install
 $ poetry run python app.py // access to localhost:8989
 ```
 
-### note
+### Train model
+
+[colab](https://colab.research.google.com/drive/1JMFFDpNhgk0m1NZFeWFyuNj6yojQzyKI?usp=sharing)
+
+### Notes
 
 this project based on https://github.com/Kazuhito00/mediapipe-python-sample, https://clutter.ikuta.me/webusb-escpos-demo/ and https://github.com/samccone/thermal_print

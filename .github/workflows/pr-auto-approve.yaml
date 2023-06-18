@@ -17,4 +17,4 @@ jobs:
     steps:
       - uses: hmarr/auto-approve-action@v3
         with:
-          github-token: ${{ secrets.SOME_USERS_PAT }}
+          github-token: ${{ secrets.MY_GITHUB_ACCESS_TOKEN }}

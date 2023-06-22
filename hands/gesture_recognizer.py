@@ -40,7 +40,7 @@ def get_args():
     return args
 
 def prepare():
-    printer.init_printer()
+    #printer.init_printer()
     
     # 引数解析
     args = get_args()

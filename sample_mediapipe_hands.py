@@ -1,15 +1,16 @@
 # mediapipe Hands (python) とMMMで転移学習したモデルでジェスチャ認識する
 # ジェスチャモデルの実行サンプル: https://developers.google.com/mediapipe/solutions/vision/gesture_recognizer/python
+# callback関数の参考: https://discuss.streamlit.io/t/unable-to-view-integrated-webcam-window/44153
+# draw_landmarksの参考: https://colab.research.google.com/github/googlesamples/mediapipe/blob/main/examples/hand_landmarker/python/hand_landmarker.ipynb
 
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from printer import controller as printer
-import numpy as np
-import copy
-import argparse
-import time
+from mediapipe.framework.formats import landmark_pb2
 
+import threading
+import numpy as np
 import cv2 as cv
 
 model_path = './model/gesture_recognizer.task'
@@ -20,45 +21,71 @@ GestureRecognizerOptions = mp.tasks.vision.GestureRecognizerOptions
 GestureRecognizerResult = mp.tasks.vision.GestureRecognizerResult
 VisionRunningMode = mp.tasks.vision.RunningMode
 
+lock = threading.Lock()
+current_gestures = []
+current_landmarks = []
+num_hands = 2
 
-# クライアントへkeypoints描画した画像を送り返す
-# def play_processed_image(output_image):
-#     #raise NotImplementedError()
-#     imgencode=cv.imencode('.jpg',output_image.numpy_view())[1]
-#     stringData=imgencode.tostring()
-#     (b'--frame\r\n' # yieldではない
-#         b'Content-Type: text/plain\r\n\r\n'+stringData+b'\r\n')
+mp_drawing = mp.solutions.drawing_utils
+mp_hands = mp.solutions.hands
+hands = mp_hands.Hands(
+    static_image_mode=False,
+    max_num_hands=num_hands,
+    min_detection_confidence=0.65,
+    min_tracking_confidence=0.65)
 
-# 検出コールバック
-# Create a hand landmarker instance with the live stream mode:
-def print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
-    
-    # # keypoints描画した画像を表示する
-    # try:
-    #     #img_ = cv.UMat(output_image.numpy_view())
-    #     # cv_mat = cv.imread(output_image)
-    #     # img = np.array(output_image)
-    #     #img = output_image.numpy_view()
-    #     imgencode = cv.imencode('.jpg',output_image.numpy_view())[1]
-    #     cv.imshow('frame',imgencode.copy()) # copy avoid Unknown C++ exceptio
-    # except Exception as e:
-    #     print(f'====CV Exception====\n{e}')
+# ジェスチャ認識コールバック
+def __callback(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
+    lock.acquire() # solves potential concurrency issues
+    current_gestures = []
+    current_landmarks = []
 
-    im = output_image.numpy_view()
-    cv.imshow('frame',im)
+    # ジェスチャ認識されていたらパースして配列に格納
+    if result is not None and any(result.gestures):
+        print("Recognized gestures:")
+        for single_hand_gesture_data in result.gestures:
+            gesture_name = single_hand_gesture_data[0].category_name
+            print(gesture_name)
+            current_gestures.append(gesture_name)
 
-    # webクライアントに画像を送信する
-    # imgencode=cv.imencode('.jpg',mp_image.numpy_view())[1]
-    # stringData=imgencode.tostring()
-    # yield (b'--frame\r\n'
-    #     b'Content-Type: text/plain\r\n\r\n'+stringData+b'\r\n')
-    if cv.waitKey(1) & 0xFF == ord('q'):
-        return
-    
-    if 0 < len(result.gestures):
-         print('gesture recognition result: {}'.format(result.gestures))
+    # hand認識されていたらパースして配列に格納
+    if not result is not None and any(result.hand_landmarks):
+        for hand_landmarks in result.hand_landmarks:
+            current_landmarks.append(result.hand_landmarks)
+    lock.release()
 
-    # # 印刷指示
+# ジェスチャ種類を描画
+def put_gestures(image):
+    lock.acquire()
+    gestures = current_gestures
+    lock.release()
+    y_pos = 50
+    for hand_gesture_name in gestures:
+    # show the prediction on the frame
+        cv.putText(image, hand_gesture_name, 
+                   (10, y_pos), 
+                   cv.FONT_HERSHEY_SIMPLEX, 
+                   1, (0,0,255), 2, 
+                   cv.LINE_AA)
+        y_pos += 50
+    return image
+
+def put_landmarks(image):
+    lock.acquire()
+    landmarks = current_landmarks
+    lock.release()
+    # mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image.numpy_view())
+
+    # Draw the hand landmarks.
+    mp_drawing.draw_landmarks(
+      image,
+      landmarks,
+      mp.solutions.hands.HAND_CONNECTIONS,
+      mp.solutions.drawing_styles.get_default_hand_landmarks_style(), # If this argument is explicitly set to None, no landmarks will be drawn.
+      mp.solutions.drawing_styles.get_default_hand_connections_style()) # If this argument is explicitly set to None, no connections will be drawn.
+
+# 印刷指示
+# def print_receipt():
     # if not isPrinting_:
     #     isPrinting_ = True
     #     ### start thread (escposがasyncio未対応のためconcurrent.futureでラップしています😿) ###
@@ -100,75 +127,48 @@ def prepare():
     cap.set(cv.CAP_PROP_FRAME_WIDTH, 960)
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, 540)
 
-    # use_static_image_mode = args.use_static_image_mode
-    # min_detection_confidence = args.min_detection_confidence
-    # min_tracking_confidence = args.min_tracking_confidence
-    # use_brect = True
-
     # Create an GestureRecognizer object.
     options = GestureRecognizerOptions(
         base_options=BaseOptions(model_asset_path=model_path),
         running_mode=VisionRunningMode.LIVE_STREAM,
-        result_callback=print_result)
+        result_callback=__callback)
 
     return (cap, options)
 
 def execute():
 
-    # mp_hands = mp.solutions.hands
-    # mp_drawing = mp.solutions.drawing_utils
-    # mp_drawing_styles = mp.solutions.drawing_styles
-
-    counter_ = 0
-    isPrinting_ = False
+    #isPrinting_ = False
+    ms_timestamp = 0
     image_ = None
-    frames = []
-
     cap_,options = prepare()
 
     with GestureRecognizer.create_from_options(options) as recognizer:
-        # The landmarker is initialized. Use it here.
-        # ...
-        # Create a loop to read the latest frame from the camera using VideoCapture#read()
         try:
             while True:
-                # counter_+=1
-                # if counter_==3:
-                #     counter_ = 0
-                #     continue
-
                 # カメラキャプチャ #####################################################
                 ret, image_ = cap_.read()
-                ms_timestamp = int(time.time()*1000) # ms単位で必要なので小数点以下四捨五入せず*1000して残す
+                if not ret: break
 
-                if not ret: return
                 image_ = cv.flip(image_, 1)  # ミラー表示
-
-                #debug_image = copy.deepcopy(image_)
-
-                # Convert the frame received from OpenCV to a MediaPipe’s Image object.
                 mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_) # data =  numpy_frame_from_opencv
-                
-                # 検出実施 
-                # 画像またはビデオモデルで実行している場合、Image Embedder タスクは入力画像またはフレームの処理が完了するまで現在のスレッドをブロックします。
-                # とあるので、livestreamモードで実行します
-                # TODO: HandLandmarkerOptionsで設定したresult_callbackにresultが入っている
-                
-                # Send live image data to perform hand landmarks detection.
-                # The hand landmarker must be created with the live stream mode.
-                recognizer.recognize_async(mp_image, ms_timestamp)
+                recognizer.recognize_async(mp_image, ms_timestamp) # 検出実施, 結果の処理はコールバックへ
+                    
+                # ジェスチャを描画します
+                copied_ = image_.copy()
+                # im_ = put_gestures(copied_)
+                put_landmarks(copied_)
+                mp_drawing.draw_landmarks(
+                    copied_,
+                    current_landmarks,
+                    mp.solutions.hands.HAND_CONNECTIONS,
+                    mp.solutions.drawing_styles.get_default_hand_landmarks_style(), # If this argument is explicitly set to None, no landmarks will be drawn.
+                    mp.solutions.drawing_styles.get_default_hand_connections_style()) # If this argument is explicitly set to None, no connections will be drawn.
 
-                # 結果の処理はコールバックへ
+                ms_timestamp += 1 # should be monotonically increasing, because in LIVE_STREAM mode
 
-                # cv.imshow('frame',image_)
-
-                # # webクライアントに画像を送信する
-                # # imgencode=cv.imencode('.jpg',mp_image.numpy_view())[1]
-                # # stringData=imgencode.tostring()
-                # # yield (b'--frame\r\n'
-                # #     b'Content-Type: text/plain\r\n\r\n'+stringData+b'\r\n')
-                # if cv.waitKey(1) & 0xFF == ord('q'):
-                #     break
+                cv.imshow('MediaPipe Hands', copied_)
+                if cv.waitKey(1) & 0xFF == 27:
+                    break
 
         except KeyboardInterrupt:
             print('===KeyboardInterrupt===')

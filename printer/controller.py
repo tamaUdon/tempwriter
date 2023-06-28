@@ -16,13 +16,11 @@ def init_printer():
     p.text(text)
     p.cut()
 
-def output_and_cut(text):
-
+def output_and_cut(txt):
     global p
 
     try:
-        p.text(text)
+        p.text(txt)
         p.cut()
-        time.sleep(1.0)
     except Exception as e:
         print(e)

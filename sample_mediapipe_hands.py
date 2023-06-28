@@ -3,15 +3,25 @@
 # callback関数の参考: https://discuss.streamlit.io/t/unable-to-view-integrated-webcam-window/44153
 # draw_landmarksの参考: https://colab.research.google.com/github/googlesamples/mediapipe/blob/main/examples/hand_landmarker/python/hand_landmarker.ipynb
 
+# TODO: typing導入する
+
 import mediapipe as mp
+import functools
+import threading
+import numpy as np
+import cv2 as cv
+import asyncio
+
+from asyncio import events
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from printer import controller as printer
 from mediapipe.framework.formats import landmark_pb2
+from typing import Any, Callable, TypeVar
 
-import threading
-import numpy as np
-import cv2 as cv
+T = TypeVar("T")
+
+from concurrent.futures import ThreadPoolExecutor
 
 model_path = './model/gesture_recognizer.task'
 
@@ -24,6 +34,7 @@ VisionRunningMode = mp.tasks.vision.RunningMode
 lock = threading.Lock()
 current_gestures = []
 current_landmarks = []
+last_gesture = []
 num_hands = 2
 
 mp_drawing = mp.solutions.drawing_utils
@@ -37,8 +48,6 @@ hands = mp_hands.Hands(
 # ジェスチャ認識コールバック
 def __callback(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     lock.acquire() # solves potential concurrency issues
-    current_gestures = []
-    current_landmarks = []
 
     # ジェスチャ認識されていたらパースして配列に格納
     if result is not None and any(result.gestures):
@@ -51,50 +60,13 @@ def __callback(result: GestureRecognizerResult, output_image: mp.Image, timestam
     # hand認識されていたらパースして配列に格納
     if not result is not None and any(result.hand_landmarks):
         for hand_landmarks in result.hand_landmarks:
-            current_landmarks.append(result.hand_landmarks)
+            current_landmarks.append(hand_landmarks)
+            
+    # 300frameに1回print
+    if timestamp_ms%60*5 == 0:
+        printer.output_and_cut("apple🍎orange🍊bananna🍌")
+                            
     lock.release()
-
-# ジェスチャ種類を描画
-def put_gestures(image):
-    lock.acquire()
-    gestures = current_gestures
-    lock.release()
-    y_pos = 50
-    for hand_gesture_name in gestures:
-    # show the prediction on the frame
-        cv.putText(image, hand_gesture_name, 
-                   (10, y_pos), 
-                   cv.FONT_HERSHEY_SIMPLEX, 
-                   1, (0,0,255), 2, 
-                   cv.LINE_AA)
-        y_pos += 50
-    return image
-
-def put_landmarks(image):
-    lock.acquire()
-    landmarks = current_landmarks
-    lock.release()
-    # mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image.numpy_view())
-
-    # Draw the hand landmarks.
-    mp_drawing.draw_landmarks(
-      image,
-      landmarks,
-      mp.solutions.hands.HAND_CONNECTIONS,
-      mp.solutions.drawing_styles.get_default_hand_landmarks_style(), # If this argument is explicitly set to None, no landmarks will be drawn.
-      mp.solutions.drawing_styles.get_default_hand_connections_style()) # If this argument is explicitly set to None, no connections will be drawn.
-
-# 印刷指示
-# def print_receipt():
-    # if not isPrinting_:
-    #     isPrinting_ = True
-    #     ### start thread (escposがasyncio未対応のためconcurrent.futureでラップしています😿) ###
-    #     # ref. https://gist.github.com/tag1216/40b75346fd4ffdbfba22a55905094b0e#file-03_map-py
-    #     with ThreadPoolExecutor(max_workers=2, thread_name_prefix="print_thread") as executor:
-    #         future = executor.submit(printer.output_and_cut, "XXXXXXX!")
-    #     # print(future.result())
-    # ### end thread ###
-    # isPrinting_ = False
 
     ### ジェスチャの戻り値形式
     # GestureRecognizerResult:
@@ -115,11 +87,70 @@ def put_landmarks(image):
     #     Landmark #1:
     #      ...
 
+# ジェスチャ種類を描画
+def put_gestures(image):
+    lock.acquire()
+    gestures = current_gestures
+    lock.release()
+    y_pos = 50
+    for hand_gesture_name in gestures:
+    # show the prediction on the frame
+        cv.putText(image, hand_gesture_name, 
+                   (10, y_pos), 
+                   cv.FONT_HERSHEY_SIMPLEX, 
+                   1, (0,0,255), 2, 
+                   cv.LINE_AA)
+        y_pos += 50
+    return image
+
+# landmark描画
+def put_landmarks(image):
+    lock.acquire()
+    landmarks = current_landmarks
+    lock.release()
+    # mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image.numpy_view())
+
+    # Draw the hand landmarks.
+    mp_drawing.draw_landmarks(
+      image,
+      landmarks,
+      mp.solutions.hands.HAND_CONNECTIONS,
+      mp.solutions.drawing_styles.get_default_hand_landmarks_style(), # If this argument is explicitly set to None, no landmarks will be drawn.
+      mp.solutions.drawing_styles.get_default_hand_connections_style()) # If this argument is explicitly set to None, no connections will be drawn.
+    
+# # ジェスチャを画像にマップ
+# def map_gesture_to_img():
+#     # if current_gestures[0] == "a":
+#     #     raise NotImplementedError()
+#     # elif current_gestures[0] == "p":
+#     #     raise NotImplementedError()
+#     # elif current_gestures[0] == "l":
+#     #     raise NotImplementedError()
+#     # elif current_gestures[0] == "e":
+#     #     raise NotImplementedError()
+#     # elif current_gestures[0] == "none":
+#     #     raise NotImplementedError()
+#     print(f'current gestures[0]={current_gestures[0]}')
+#     return "txttxttxttxttxttxt"
+
+# # 今回認識したジェスチャと同じかチェック
+# def is_gesture_changed():
+#     if last_gesture[0] == current_gestures[0]:
+#         return False
+#     return True
+
+# # 前回認識したジェスチャを記憶
+# def update_last_gesture():
+#     lock.acquire()
+#     last_gesture = current_gestures
+#     current_gestures = []
+#     current_landmarks = []
+#     lock.release()
 
 # 初期化
 def prepare():
     # printer準備
-    # printer.init_printer()
+    printer.init_printer()
     
     # カメラ準備 
     # Use OpenCV’s VideoCapture to start capturing from the webcam.
@@ -135,12 +166,12 @@ def prepare():
 
     return (cap, options)
 
+# タイプライター実行
 def execute():
-
-    #isPrinting_ = False
     ms_timestamp = 0
     image_ = None
     cap_,options = prepare()
+    isPrinting = False
 
     with GestureRecognizer.create_from_options(options) as recognizer:
         try:
@@ -153,7 +184,7 @@ def execute():
                 mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_) # data =  numpy_frame_from_opencv
                 recognizer.recognize_async(mp_image, ms_timestamp) # 検出実施, 結果の処理はコールバックへ
                     
-                # ジェスチャを描画します
+                # landmarkを描画します
                 copied_ = image_.copy()
                 # im_ = put_gestures(copied_)
                 put_landmarks(copied_)
@@ -165,6 +196,7 @@ def execute():
                     mp.solutions.drawing_styles.get_default_hand_connections_style()) # If this argument is explicitly set to None, no connections will be drawn.
 
                 ms_timestamp += 1 # should be monotonically increasing, because in LIVE_STREAM mode
+                # update_last_gesture()
 
                 cv.imshow('MediaPipe Hands', copied_)
                 if cv.waitKey(1) & 0xFF == 27:

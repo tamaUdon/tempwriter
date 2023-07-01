@@ -8,7 +8,8 @@ from printer import controller as printer
 
 T = TypeVar("T")
 
-
+# async非対応のescpos対策. ThreadPoolExecutorをasyncで包む
+# ref. https://www.rhoboro.com/2021/06/13/to_subthread_to_subprocess.html
 async def to_subthread(func: Callable[..., T], /, *args: Any, **kwargs: Any) -> T:
     """I/Oバウンドなブロッキング処理の関数をコルーチンに変換して実行"""
     loop = events.get_running_loop()

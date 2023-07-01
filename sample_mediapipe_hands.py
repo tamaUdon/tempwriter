@@ -11,6 +11,7 @@ import threading
 import numpy as np
 import cv2 as cv
 import asyncio
+import statistics
 
 from asyncio import events
 from mediapipe.tasks import python
@@ -51,21 +52,26 @@ def __callback(result: GestureRecognizerResult, output_image: mp.Image, timestam
 
     # ジェスチャ認識されていたらパースして配列に格納
     if result is not None and any(result.gestures):
-        print("Recognized gestures:")
+        # print("Recognized gestures:")
         for single_hand_gesture_data in result.gestures:
-            gesture_name = single_hand_gesture_data[0].category_name
-            print(gesture_name)
-            current_gestures.append(gesture_name)
+            if gesture_name := single_hand_gesture_data[0].category_name:
+                # print(gesture_name)
+                current_gestures.append(gesture_name)
 
     # hand認識されていたらパースして配列に格納
     if not result is not None and any(result.hand_landmarks):
         for hand_landmarks in result.hand_landmarks:
             current_landmarks.append(hand_landmarks)
             
-    # 300frameに1回print
-    if timestamp_ms%60*5 == 0:
-        printer.output_and_cut("apple🍎orange🍊bananna🍌")
-                            
+    if timestamp_ms%60*3 == 0:
+        # 120frameに1回print
+        # printer.output_and_cut("apple🍎orange🍊bananna🍌")
+        if any(current_gestures):
+            mode = statistics.mode(current_gestures)
+            print(f'current gestures={current_gestures}')
+            print(f'最頻値={mode}')
+            current_gestures.clear()
+
     lock.release()
 
     ### ジェスチャの戻り値形式
@@ -150,7 +156,7 @@ def put_landmarks(image):
 # 初期化
 def prepare():
     # printer準備
-    printer.init_printer()
+    # printer.init_printer()
     
     # カメラ準備 
     # Use OpenCV’s VideoCapture to start capturing from the webcam.
@@ -187,7 +193,7 @@ def execute():
                 # landmarkを描画します
                 copied_ = image_.copy()
                 # im_ = put_gestures(copied_)
-                put_landmarks(copied_)
+                # put_landmarks(copied_)
                 mp_drawing.draw_landmarks(
                     copied_,
                     current_landmarks,

@@ -35,7 +35,7 @@ VisionRunningMode = mp.tasks.vision.RunningMode
 lock = threading.Lock()
 current_gestures = []
 current_img = None
-last_gesture = []
+last_gesture = ""
 num_hands = 2
 
 mp_drawing = mp.solutions.drawing_utils
@@ -49,6 +49,7 @@ hands = mp_hands.Hands(
 # ジェスチャ認識コールバック
 def __callback(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     global current_img
+    global last_gesture
     copied_ = output_image.numpy_view()
 
     # ジェスチャ認識されていたらパースして配列に格納
@@ -58,7 +59,7 @@ def __callback(result: GestureRecognizerResult, output_image: mp.Image, timestam
             if gesture_name := single_hand_gesture_data[0].category_name:
                 # print(gesture_name)
                 current_gestures.append(gesture_name)
-                put_gestures(copied_,current_gestures)
+                #put_gestures(copied_,current_gestures)
 
     # hand認識されていたらパースして配列に格納
     if result is not None and any(result.hand_landmarks):
@@ -77,13 +78,17 @@ def __callback(result: GestureRecognizerResult, output_image: mp.Image, timestam
                 mp.solutions.drawing_styles.get_default_hand_connections_style()) # If this argument is explicitly set to None, no connections will be drawn.
     current_img = copied_
             
-    # 120frameに1回print
-    if timestamp_ms%60*3 == 0:
-        # printer.output_and_cut("apple🍎orange🍊bananna🍌")
+    # 240frameに1回print
+    if timestamp_ms%60*4 == 0:
         if any(current_gestures):
             mode = statistics.mode(current_gestures)
             print(f'current gestures={current_gestures}')
             print(f'最頻値={mode}')
+            if mode != "none" and last_gesture != mode:
+                with open(f'./data/AA/{mode}.txt') as f:
+                    s = f.read()
+                    printer.write(s)
+            last_gesture = mode
             current_gestures.clear()
 
 # ジェスチャ種類を描画
@@ -101,7 +106,7 @@ def put_gestures(image, current_gestures):
 # 初期化
 def prepare():
     # printer準備
-    # printer.init_printer()
+    printer.init_printer()
     
     # カメラ準備 
     cap=cv.VideoCapture(0)

@@ -1,22 +1,18 @@
-### What is TEMP-WRITER
+### 概要
+ハンドジェスチャでうごくタイプライターです 
+mediapipe(Hands)でハンドジェスチャーを認識して、サーマルプリンタ(EPSON TM-T90)で画像や文字列を印刷できます
 
-TEMP-WRITER is a virtual typewriter system that can be used on a desktop.  
- It utilizes mediapipe(Hands) to recognize your hand gestures, and a thermal printer (EPSON TM-T90) is used to print images and strings that have been bound to specific gestures in real-time.
-
-The preset images and strings can be customized and used for various creative purposes.  
-For example, registering alphabets and symbols will make it work like a "real" typewriter.  
-It is also possible to endlessly print out only kawaii cat images.
-
-Now, please enjoy this creation.
-
-### Install
-
+### 使い方
 ```
 $ brew install libusb // requirements for pyusb (macOS)
 $ poetry install
 $ poetry run python xxx.py
 ```
+カメラに映ったジェスチャを認識してプリンターが文字を出力します
 
-### Train model
-
+### 学習時のコード
 [colab](https://colab.research.google.com/drive/1JMFFDpNhgk0m1NZFeWFyuNj6yojQzyKI?usp=sharing)
+
+### Appendix
+制作時のブログ 
+https://tama-ud.hatenablog.com/entry/2023/07/09/030155
